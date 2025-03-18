@@ -587,14 +587,17 @@ if image is not None:
     predictions = results[0].boxes.data.cpu().numpy()
 
     if len(predictions) > 0:
-        # 將辨識結果按信心分數排序，取準確率最高的一種
-        best_prediction = max(predictions, key=lambda row: row[4])  # 假設信心分數在第五欄
-        plant_name= model.names[int(best_prediction[5])]  # 假設類別標籤在第六欄
-        confidence = best_prediction[4]
+        identified_plants = set()
+        
+        for row in predictions:
+            plant_name = model.names[int(row[5])]  # 假設類別標籤在第六欄
+            confidence = row[4]  # 假設信心分數在第五欄
+            identified_plants.add((plant_name, confidence))
 
-        # 顯示最高準確率的植物資訊
-        st.markdown(f"**植物學名：{plant_name}** (信心分數：{confidence:.2f})")
-
+        
+        for plant_name, confidence in identified_plants:
+            st.markdown(f"**植物學名：{plant_name}** (信心分數：{confidence:.2f})")
+            
         if plant_name in plant_info:
             info = plant_info[plant_name]
             # 🌿 標題
@@ -754,3 +757,22 @@ elif choice == "註冊":
 # 如果登入成功，顯示個人辨識紀錄
 if "user" in st.session_state:
     st.sidebar.write(f"✅ 已登入：{st.session_state['user']}")
+
+
+if image is not None:
+    image_np = np.array(image)
+    results = model(image_np)
+    predictions = results[0].boxes.data.cpu().numpy()
+
+    if len(predictions) > 0:
+        identified_plants = set()
+        
+        for row in predictions:
+            plant_name = model.names[int(row[5])]  # 假設類別標籤在第六欄
+            confidence = row[4]  # 假設信心分數在第五欄
+            identified_plants.add((plant_name, confidence))
+
+        
+        for plant_name, confidence in identified_plants:
+            st.markdown(f"**植物學名：{plant_name}** (信心分數：{confidence:.2f})")
+            
